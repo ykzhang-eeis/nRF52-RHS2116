@@ -1,0 +1,2 @@
+# nRF52-RHS2116
+BCI EEG-Signal
