@@ -430,122 +430,122 @@ ARM Macro Assembler    Page 7
   371 0000001C                 END
               00000000 
               00000000 
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
-erwork --depend=.\_build\arm_startup_nrf52.d -o.\_build\arm_startup_nrf52.o -I.
-.\..\..\config -I..\..\..\..\..\..\components -I..\..\..\..\..\..\components\bl
-e\ble_advertising -I..\..\..\..\..\..\components\ble\ble_dtm -I..\..\..\..\..\.
-.\components\ble\ble_link_ctx_manager -I..\..\..\..\..\..\components\ble\ble_ra
-cp -I..\..\..\..\..\..\components\ble\ble_services\ble_ancs_c -I..\..\..\..\..\
-..\components\ble\ble_services\ble_ans_c -I..\..\..\..\..\..\components\ble\ble
-_services\ble_bas -I..\..\..\..\..\..\components\ble\ble_services\ble_bas_c -I.
-.\..\..\..\..\..\components\ble\ble_services\ble_cscs -I..\..\..\..\..\..\compo
-nents\ble\ble_services\ble_cts_c -I..\..\..\..\..\..\components\ble\ble_service
-s\ble_dfu -I..\..\..\..\..\..\components\ble\ble_services\ble_dis -I..\..\..\..
-\..\..\components\ble\ble_services\ble_gls -I..\..\..\..\..\..\components\ble\b
-le_services\ble_hids -I..\..\..\..\..\..\components\ble\ble_services\ble_hrs -I
-..\..\..\..\..\..\components\ble\ble_services\ble_hrs_c -I..\..\..\..\..\..\com
-ponents\ble\ble_services\ble_hts -I..\..\..\..\..\..\components\ble\ble_service
-s\ble_ias -I..\..\..\..\..\..\components\ble\ble_services\ble_ias_c -I..\..\..\
-..\..\..\components\ble\ble_services\ble_lbs -I..\..\..\..\..\..\components\ble
-\ble_services\ble_lbs_c -I..\..\..\..\..\..\components\ble\ble_services\ble_lls
- -I..\..\..\..\..\..\components\ble\ble_services\ble_nus -I..\..\..\..\..\..\co
-mponents\ble\ble_services\ble_nus_c -I..\..\..\..\..\..\components\ble\ble_serv
-ices\ble_rscs -I..\..\..\..\..\..\components\ble\ble_services\ble_rscs_c -I..\.
-.\..\..\..\..\components\ble\ble_services\ble_tps -I..\..\..\..\..\..\component
-s\ble\common -I..\..\..\..\..\..\components\ble\nrf_ble_gatt -I..\..\..\..\..\.
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
+interwork --depend=.\_build\arm_startup_nrf52.d -o.\_build\arm_startup_nrf52.o 
+-I..\..\..\config -I..\..\..\..\..\..\components -I..\..\..\..\..\..\components
+\ble\ble_advertising -I..\..\..\..\..\..\components\ble\ble_dtm -I..\..\..\..\.
+.\..\components\ble\ble_link_ctx_manager -I..\..\..\..\..\..\components\ble\ble
+_racp -I..\..\..\..\..\..\components\ble\ble_services\ble_ancs_c -I..\..\..\..\
+..\..\components\ble\ble_services\ble_ans_c -I..\..\..\..\..\..\components\ble\
+ble_services\ble_bas -I..\..\..\..\..\..\components\ble\ble_services\ble_bas_c 
+-I..\..\..\..\..\..\components\ble\ble_services\ble_cscs -I..\..\..\..\..\..\co
+mponents\ble\ble_services\ble_cts_c -I..\..\..\..\..\..\components\ble\ble_serv
+ices\ble_dfu -I..\..\..\..\..\..\components\ble\ble_services\ble_dis -I..\..\..
+\..\..\..\components\ble\ble_services\ble_gls -I..\..\..\..\..\..\components\bl
+e\ble_services\ble_hids -I..\..\..\..\..\..\components\ble\ble_services\ble_hrs
+ -I..\..\..\..\..\..\components\ble\ble_services\ble_hrs_c -I..\..\..\..\..\..\
+components\ble\ble_services\ble_hts -I..\..\..\..\..\..\components\ble\ble_serv
+ices\ble_ias -I..\..\..\..\..\..\components\ble\ble_services\ble_ias_c -I..\..\
+..\..\..\..\components\ble\ble_services\ble_lbs -I..\..\..\..\..\..\components\
+ble\ble_services\ble_lbs_c -I..\..\..\..\..\..\components\ble\ble_services\ble_
+lls -I..\..\..\..\..\..\components\ble\ble_services\ble_nus -I..\..\..\..\..\..
+\components\ble\ble_services\ble_nus_c -I..\..\..\..\..\..\components\ble\ble_s
+ervices\ble_rscs -I..\..\..\..\..\..\components\ble\ble_services\ble_rscs_c -I.
+.\..\..\..\..\..\components\ble\ble_services\ble_tps -I..\..\..\..\..\..\compon
+ents\ble\common -I..\..\..\..\..\..\components\ble\nrf_ble_gatt -I..\..\..\..\.
 
 
 
 ARM Macro Assembler    Page 8 
 
 
-.\components\ble\nrf_ble_qwr -I..\..\..\..\..\..\components\ble\peer_manager -I
-..\..\..\..\..\..\components\boards -I..\..\..\..\..\..\components\libraries\at
-omic -I..\..\..\..\..\..\components\libraries\atomic_fifo -I..\..\..\..\..\..\c
-omponents\libraries\atomic_flags -I..\..\..\..\..\..\components\libraries\ballo
-c -I..\..\..\..\..\..\components\libraries\bootloader\ble_dfu -I..\..\..\..\..\
-..\components\libraries\bsp -I..\..\..\..\..\..\components\libraries\button -I.
-.\..\..\..\..\..\components\libraries\cli -I..\..\..\..\..\..\components\librar
-ies\crc16 -I..\..\..\..\..\..\components\libraries\crc32 -I..\..\..\..\..\..\co
-mponents\libraries\crypto -I..\..\..\..\..\..\components\libraries\csense -I..\
-..\..\..\..\..\components\libraries\csense_drv -I..\..\..\..\..\..\components\l
-ibraries\delay -I..\..\..\..\..\..\components\libraries\ecc -I..\..\..\..\..\..
-\components\libraries\experimental_section_vars -I..\..\..\..\..\..\components\
-libraries\experimental_task_manager -I..\..\..\..\..\..\components\libraries\fd
-s -I..\..\..\..\..\..\components\libraries\fifo -I..\..\..\..\..\..\components\
-libraries\fstorage -I..\..\..\..\..\..\components\libraries\gfx -I..\..\..\..\.
-.\..\components\libraries\gpiote -I..\..\..\..\..\..\components\libraries\hardf
-ault -I..\..\..\..\..\..\components\libraries\hci -I..\..\..\..\..\..\component
-s\libraries\led_softblink -I..\..\..\..\..\..\components\libraries\log -I..\..\
-..\..\..\..\components\libraries\log\src -I..\..\..\..\..\..\components\librari
-es\low_power_pwm -I..\..\..\..\..\..\components\libraries\mem_manager -I..\..\.
-.\..\..\..\components\libraries\memobj -I..\..\..\..\..\..\components\libraries
-\mpu -I..\..\..\..\..\..\components\libraries\mutex -I..\..\..\..\..\..\compone
-nts\libraries\pwm -I..\..\..\..\..\..\components\libraries\pwr_mgmt -I..\..\..\
-..\..\..\components\libraries\queue -I..\..\..\..\..\..\components\libraries\ri
-ngbuf -I..\..\..\..\..\..\components\libraries\scheduler -I..\..\..\..\..\..\co
-mponents\libraries\sdcard -I..\..\..\..\..\..\components\libraries\slip -I..\..
-\..\..\..\..\components\libraries\sortlist -I..\..\..\..\..\..\components\libra
-ries\spi_mngr -I..\..\..\..\..\..\components\libraries\stack_guard -I..\..\..\.
-.\..\..\components\libraries\strerror -I..\..\..\..\..\..\components\libraries\
-svc -I..\..\..\..\..\..\components\libraries\timer -I..\..\..\..\..\..\componen
-ts\libraries\twi_mngr -I..\..\..\..\..\..\components\libraries\twi_sensor -I..\
-..\..\..\..\..\components\libraries\uart -I..\..\..\..\..\..\components\librari
-es\usbd -I..\..\..\..\..\..\components\libraries\usbd\class\audio -I..\..\..\..
-\..\..\components\libraries\usbd\class\cdc -I..\..\..\..\..\..\components\libra
-ries\usbd\class\cdc\acm -I..\..\..\..\..\..\components\libraries\usbd\class\hid
- -I..\..\..\..\..\..\components\libraries\usbd\class\hid\generic -I..\..\..\..\
-..\..\components\libraries\usbd\class\hid\kbd -I..\..\..\..\..\..\components\li
-braries\usbd\class\hid\mouse -I..\..\..\..\..\..\components\libraries\usbd\clas
-s\msc -I..\..\..\..\..\..\components\libraries\util -I..\..\..\..\..\..\compone
-nts\nfc\ndef\conn_hand_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_hand
-_parser\ac_rec_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_hand_parser\
-ble_oob_advdata_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_hand_parser
-\le_oob_rec_parser -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\
-ac_rec -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_oob_advd
-ata -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_pair_lib -I
-..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_pair_msg -I..\..\
-..\..\..\..\components\nfc\ndef\connection_handover\common -I..\..\..\..\..\..\
-components\nfc\ndef\connection_handover\ep_oob_rec -I..\..\..\..\..\..\componen
-ts\nfc\ndef\connection_handover\hs_rec -I..\..\..\..\..\..\components\nfc\ndef\
-connection_handover\le_oob_rec -I..\..\..\..\..\..\components\nfc\ndef\generic\
-message -I..\..\..\..\..\..\components\nfc\ndef\generic\record -I..\..\..\..\..
-\..\components\nfc\ndef\launchapp -I..\..\..\..\..\..\components\nfc\ndef\parse
-r\message -I..\..\..\..\..\..\components\nfc\ndef\parser\record -I..\..\..\..\.
-.\..\components\nfc\ndef\text -I..\..\..\..\..\..\components\nfc\ndef\uri -I..\
-..\..\..\..\..\components\nfc\platform -I..\..\..\..\..\..\components\nfc\t2t_l
-ib -I..\..\..\..\..\..\components\nfc\t2t_parser -I..\..\..\..\..\..\components
-\nfc\t4t_lib -I..\..\..\..\..\..\components\nfc\t4t_parser\apdu -I..\..\..\..\.
-.\..\components\nfc\t4t_parser\cc_file -I..\..\..\..\..\..\components\nfc\t4t_p
-arser\hl_detection_procedure -I..\..\..\..\..\..\components\nfc\t4t_parser\tlv 
+.\..\components\ble\nrf_ble_qwr -I..\..\..\..\..\..\components\ble\peer_manager
+ -I..\..\..\..\..\..\components\boards -I..\..\..\..\..\..\components\libraries
+\atomic -I..\..\..\..\..\..\components\libraries\atomic_fifo -I..\..\..\..\..\.
+.\components\libraries\atomic_flags -I..\..\..\..\..\..\components\libraries\ba
+lloc -I..\..\..\..\..\..\components\libraries\bootloader\ble_dfu -I..\..\..\..\
+..\..\components\libraries\bsp -I..\..\..\..\..\..\components\libraries\button 
+-I..\..\..\..\..\..\components\libraries\cli -I..\..\..\..\..\..\components\lib
+raries\crc16 -I..\..\..\..\..\..\components\libraries\crc32 -I..\..\..\..\..\..
+\components\libraries\crypto -I..\..\..\..\..\..\components\libraries\csense -I
+..\..\..\..\..\..\components\libraries\csense_drv -I..\..\..\..\..\..\component
+s\libraries\delay -I..\..\..\..\..\..\components\libraries\ecc -I..\..\..\..\..
+\..\components\libraries\experimental_section_vars -I..\..\..\..\..\..\componen
+ts\libraries\experimental_task_manager -I..\..\..\..\..\..\components\libraries
+\fds -I..\..\..\..\..\..\components\libraries\fifo -I..\..\..\..\..\..\componen
+ts\libraries\fstorage -I..\..\..\..\..\..\components\libraries\gfx -I..\..\..\.
+.\..\..\components\libraries\gpiote -I..\..\..\..\..\..\components\libraries\ha
+rdfault -I..\..\..\..\..\..\components\libraries\hci -I..\..\..\..\..\..\compon
+ents\libraries\led_softblink -I..\..\..\..\..\..\components\libraries\log -I..\
+..\..\..\..\..\components\libraries\log\src -I..\..\..\..\..\..\components\libr
+aries\low_power_pwm -I..\..\..\..\..\..\components\libraries\mem_manager -I..\.
+.\..\..\..\..\components\libraries\memobj -I..\..\..\..\..\..\components\librar
+ies\mpu -I..\..\..\..\..\..\components\libraries\mutex -I..\..\..\..\..\..\comp
+onents\libraries\pwm -I..\..\..\..\..\..\components\libraries\pwr_mgmt -I..\..\
+..\..\..\..\components\libraries\queue -I..\..\..\..\..\..\components\libraries
+\ringbuf -I..\..\..\..\..\..\components\libraries\scheduler -I..\..\..\..\..\..
+\components\libraries\sdcard -I..\..\..\..\..\..\components\libraries\slip -I..
+\..\..\..\..\..\components\libraries\sortlist -I..\..\..\..\..\..\components\li
+braries\spi_mngr -I..\..\..\..\..\..\components\libraries\stack_guard -I..\..\.
+.\..\..\..\components\libraries\strerror -I..\..\..\..\..\..\components\librari
+es\svc -I..\..\..\..\..\..\components\libraries\timer -I..\..\..\..\..\..\compo
+nents\libraries\twi_mngr -I..\..\..\..\..\..\components\libraries\twi_sensor -I
+..\..\..\..\..\..\components\libraries\uart -I..\..\..\..\..\..\components\libr
+aries\usbd -I..\..\..\..\..\..\components\libraries\usbd\class\audio -I..\..\..
+\..\..\..\components\libraries\usbd\class\cdc -I..\..\..\..\..\..\components\li
+braries\usbd\class\cdc\acm -I..\..\..\..\..\..\components\libraries\usbd\class\
+hid -I..\..\..\..\..\..\components\libraries\usbd\class\hid\generic -I..\..\..\
+..\..\..\components\libraries\usbd\class\hid\kbd -I..\..\..\..\..\..\components
+\libraries\usbd\class\hid\mouse -I..\..\..\..\..\..\components\libraries\usbd\c
+lass\msc -I..\..\..\..\..\..\components\libraries\util -I..\..\..\..\..\..\comp
+onents\nfc\ndef\conn_hand_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_h
+and_parser\ac_rec_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_hand_pars
+er\ble_oob_advdata_parser -I..\..\..\..\..\..\components\nfc\ndef\conn_hand_par
+ser\le_oob_rec_parser -I..\..\..\..\..\..\components\nfc\ndef\connection_handov
+er\ac_rec -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_oob_a
+dvdata -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_pair_lib
+ -I..\..\..\..\..\..\components\nfc\ndef\connection_handover\ble_pair_msg -I..\
+..\..\..\..\..\components\nfc\ndef\connection_handover\common -I..\..\..\..\..\
+..\components\nfc\ndef\connection_handover\ep_oob_rec -I..\..\..\..\..\..\compo
+nents\nfc\ndef\connection_handover\hs_rec -I..\..\..\..\..\..\components\nfc\nd
+ef\connection_handover\le_oob_rec -I..\..\..\..\..\..\components\nfc\ndef\gener
+ic\message -I..\..\..\..\..\..\components\nfc\ndef\generic\record -I..\..\..\..
+\..\..\components\nfc\ndef\launchapp -I..\..\..\..\..\..\components\nfc\ndef\pa
+rser\message -I..\..\..\..\..\..\components\nfc\ndef\parser\record -I..\..\..\.
+.\..\..\components\nfc\ndef\text -I..\..\..\..\..\..\components\nfc\ndef\uri -I
+..\..\..\..\..\..\components\nfc\platform -I..\..\..\..\..\..\components\nfc\t2
+t_lib -I..\..\..\..\..\..\components\nfc\t2t_parser -I..\..\..\..\..\..\compone
+nts\nfc\t4t_lib -I..\..\..\..\..\..\components\nfc\t4t_parser\apdu -I..\..\..\.
+.\..\..\components\nfc\t4t_parser\cc_file -I..\..\..\..\..\..\components\nfc\t4
+t_parser\hl_detection_procedure -I..\..\..\..\..\..\components\nfc\t4t_parser\t
 
 
 
 ARM Macro Assembler    Page 9 
 
 
--I..\..\..\..\..\..\components\softdevice\common -I..\..\..\..\..\..\components
-\softdevice\s132\headers -I..\..\..\..\..\..\components\softdevice\s132\headers
-\nrf52 -I..\..\..\..\..\..\external\fprintf -I..\..\..\..\..\..\external\segger
-_rtt -I..\..\..\..\..\..\external\utf_converter -I..\..\..\..\..\..\integration
-\nrfx -I..\..\..\..\..\..\integration\nrfx\legacy -I..\..\..\..\..\..\modules\n
-rfx -I..\..\..\..\..\..\modules\nrfx\drivers\include -I..\..\..\..\..\..\module
-s\nrfx\hal -I..\..\..\..\..\..\modules\nrfx\mdk -I..\config -I.\RTE\_nrf52832_x
-xaa -IC:\Users\zyk\AppData\Local\Arm\Packs\ARM\CMSIS\4.5.0\CMSIS\Include -IC:\U
-sers\zyk\AppData\Local\Arm\Packs\NordicSemiconductor\nRF_DeviceFamilyPack\8.44.
-1\Device\Include -IC:\Keil_v5\ARM\CMSIS\Include --predefine="__MICROLIB SETA 1"
- --predefine="__UVISION_VERSION SETA 527" --predefine="_RTE_ SETA 1" --predefin
-e="NRF52832_XXAA SETA 1" --predefine="APP_TIMER_V2 SETA 1" --predefine="APP_TIM
-ER_V2_RTC1_ENABLED SETA 1" --predefine="BOARD_PCA10040 SETA 1" --predefine="CON
-FIG_GPIO_AS_PINRESET SETA 1" --predefine="FLOAT_ABI_HARD SETA 1" --predefine="N
-RF52 SETA 1" --predefine="NRF52832_XXAA SETA 1" --predefine="NRF52_PAN_74 SETA 
-1" --predefine="NRF_SD_BLE_API_VERSION SETA 7" --predefine="S132 SETA 1" --pred
-efine="SOFTDEVICE_PRESENT SETA 1" --predefine="__HEAP_SIZE SETA 8192" --predefi
-ne="__STACK_SIZE SETA 8192" --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC1_
-ENABLED,-DBOARD_PCA10040,-DCONFIG_GPIO_AS_PINRESET,-DFLOAT_ABI_HARD,-DNRF52,-DN
-RF52832_XXAA,-DNRF52_PAN_74,-DNRF_SD_BLE_API_VERSION=7,-DS132,-DSOFTDEVICE_PRES
-ENT,-D__HEAP_SIZE=8192,-D__STACK_SIZE=8192 --list=.\_build\arm_startup_nrf52.ls
-t RTE\Device\nRF52832_xxAA\arm_startup_nrf52.s
+lv -I..\..\..\..\..\..\components\softdevice\common -I..\..\..\..\..\..\compone
+nts\softdevice\s132\headers -I..\..\..\..\..\..\components\softdevice\s132\head
+ers\nrf52 -I..\..\..\..\..\..\external\fprintf -I..\..\..\..\..\..\external\seg
+ger_rtt -I..\..\..\..\..\..\external\utf_converter -I..\..\..\..\..\..\integrat
+ion\nrfx -I..\..\..\..\..\..\integration\nrfx\legacy -I..\..\..\..\..\..\module
+s\nrfx -I..\..\..\..\..\..\modules\nrfx\drivers\include -I..\..\..\..\..\..\mod
+ules\nrfx\hal -I..\..\..\..\..\..\modules\nrfx\mdk -I..\config -I.\RTE\_nrf5283
+2_xxaa -IC:\Users\zyk\AppData\Local\Arm\Packs\ARM\CMSIS\4.5.0\CMSIS\Include -IC
+:\Users\zyk\AppData\Local\Arm\Packs\NordicSemiconductor\nRF_DeviceFamilyPack\8.
+44.1\Device\Include --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERS
+ION SETA 535" --predefine="_RTE_ SETA 1" --predefine="NRF52832_XXAA SETA 1" --p
+redefine="_RTE_ SETA 1" --predefine="APP_TIMER_V2 SETA 1" --predefine="APP_TIME
+R_V2_RTC1_ENABLED SETA 1" --predefine="BOARD_PCA10040 SETA 1" --predefine="CONF
+IG_GPIO_AS_PINRESET SETA 1" --predefine="FLOAT_ABI_HARD SETA 1" --predefine="NR
+F52 SETA 1" --predefine="NRF52832_XXAA SETA 1" --predefine="NRF52_PAN_74 SETA 1
+" --predefine="NRF_SD_BLE_API_VERSION SETA 7" --predefine="S132 SETA 1" --prede
+fine="SOFTDEVICE_PRESENT SETA 1" --predefine="__HEAP_SIZE SETA 8192" --predefin
+e="__STACK_SIZE SETA 8192" --cpreproc_opts=-DAPP_TIMER_V2,-DAPP_TIMER_V2_RTC1_E
+NABLED,-DBOARD_PCA10040,-DCONFIG_GPIO_AS_PINRESET,-DFLOAT_ABI_HARD,-DNRF52,-DNR
+F52832_XXAA,-DNRF52_PAN_74,-DNRF_SD_BLE_API_VERSION=7,-DS132,-DSOFTDEVICE_PRESE
+NT,-D__HEAP_SIZE=8192,-D__STACK_SIZE=8192 --list=.\_build\arm_startup_nrf52.lst
+ RTE\Device\nRF52832_xxAA\arm_startup_nrf52.s
 
 
 

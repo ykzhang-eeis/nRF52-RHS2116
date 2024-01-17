@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <string.h>
-#include "nordic_common.h"
 #include "nrf.h"
 #include "ble_hci.h"
 #include "ble_advdata.h"
@@ -15,7 +14,6 @@
 #include "ble_nus.h"
 #include "app_uart.h"
 #include "app_util_platform.h"
-#include "bsp_btn_ble.h"
 #include "nrf_pwr_mgmt.h"
 
 #if defined (UART_PRESENT)
@@ -33,19 +31,18 @@
 #include "RHS2116.h"
 #include "nrf_delay.h"
 
-#define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
-
 #define DEVICE_NAME                     "Nordic_UART"                               /**< Name of device. Will be included in the advertising data. */
-#define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
+#define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
 
-#define APP_ADV_INTERVAL                64                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
+#define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
+#define APP_ADV_INTERVAL                64                                          /**< The advertising interval (in units of 0.625 ms. This value corresponds to 40 ms). */
 #define APP_ADV_DURATION                18000                                       /**< The advertising duration (180 seconds) in units of 10 milliseconds. */
 
-#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(10, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
-#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(20, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
+#define MIN_CONN_INTERVAL               MSEC_TO_UNITS(8, UNIT_1_25_MS)             /**< Minimum acceptable connection interval (20 ms), Connection interval uses 1.25 ms units. */
+#define MAX_CONN_INTERVAL               MSEC_TO_UNITS(16, UNIT_1_25_MS)             /**< Maximum acceptable connection interval (75 ms), Connection interval uses 1.25 ms units. */
 #define SLAVE_LATENCY                   0                                           /**< Slave latency. */
 #define CONN_SUP_TIMEOUT                MSEC_TO_UNITS(4000, UNIT_10_MS)             /**< Connection supervisory timeout (4 seconds), Supervision Timeout uses 10 ms units. */
 #define FIRST_CONN_PARAMS_UPDATE_DELAY  APP_TIMER_TICKS(5000)                       /**< Time from initiating event (connect or start of notification) to first time sd_ble_gap_conn_param_update is called (5 seconds). */
@@ -58,23 +55,11 @@
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 
 
-#define SPI_INSTANCE  1 /**< SPI instance index. */
-static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
-//SPI传输完成标志
-static volatile bool spi_xfer_done; 
-static uint8_t       m_tx_buf[] = {0,0,0,0};           /**< TX buffer. */
-static uint8_t       m_rx_buf[sizeof(m_tx_buf)];    /**< RX buffer. */
-static const uint8_t m_length = sizeof(m_tx_buf);        /**< Transfer length. */
-
-	
-
-static	  uint8_t packet_[70] = {0};
-static    uint8_t  send_pack[210] = {0};
-
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
 NRF_BLE_QWR_DEF(m_qwr);                                                             /**< Context for the Queued Write module.*/
 BLE_ADVERTISING_DEF(m_advertising);                                                 /**< Advertising module instance. */
+
 
 static uint16_t   m_conn_handle          = BLE_CONN_HANDLE_INVALID;                 /**< Handle of the current connection. */
 static uint16_t   m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;            /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
@@ -84,9 +69,15 @@ static ble_uuid_t m_adv_uuids[]          =                                      
 };
 
 
-/**
-** custom code
-**/
+#define SPI_INSTANCE  1 /**< SPI instance index. */
+static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
+static volatile bool spi_xfer_done; 
+static uint8_t       m_tx_buf[] = {0,0,0,0};           /**< TX buffer. */
+static uint8_t       m_rx_buf[sizeof(m_tx_buf)];    /**< RX buffer. */
+static const uint8_t m_length = sizeof(m_tx_buf);        /**< Transfer length. */
+
+static	  uint8_t packet_[70] = {0};
+static    uint8_t  send_pack[210] = {0};
 
 #define APP_QUEUE
 void ble_data_send_with_queue(void);
@@ -98,7 +89,6 @@ typedef struct {
 NRF_QUEUE_DEF(buffer_t, m_buf_queue, 30, NRF_QUEUE_MODE_NO_OVERFLOW);
 
 APP_TIMER_DEF(m_timer_speed);
-//uint8_t m_data_array[6300];
 uint32_t m_len_sent;
 uint32_t m_drop_cnts ;
 uint32_t m_cnt_7ms;
@@ -108,25 +98,17 @@ ret_code_t err_code;
 static buffer_t buf_;
 
 void Gather_start(void);
-void hexArrayToString(unsigned char* hexArray, int length, char* str);
 void assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     app_error_handler(DEAD_BEEF, line_num, p_file_name);
 }
 
-/**@brief Function for initializing the timer module.
- */
 static void timers_init(void)
 {
     ret_code_t err_code = app_timer_init();
     APP_ERROR_CHECK(err_code);
 }
 
-/**@brief Function for the GAP initialization.
- *
- * @details This function will set up all the necessary GAP (Generic Access Profile) parameters of
- *          the device. It also sets the permissions and appearance.
- */
 static void gap_params_init(void)
 {
     uint32_t                err_code;
@@ -217,11 +199,7 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
 		}
 
 }
-/**@snippet [Handling the data received over BLE] */
 
-
-/**@brief Function for initializing services that will be used by the application.
- */
 static void services_init(void)
 {
     uint32_t           err_code;
@@ -254,19 +232,11 @@ static void on_conn_params_evt(ble_conn_params_evt_t * p_evt)
     }
 }
 
-
-/**@brief Function for handling errors from the Connection Parameters module.
- *
- * @param[in] nrf_error  Error code containing information about what went wrong.
- */
 static void conn_params_error_handler(uint32_t nrf_error)
 {
     APP_ERROR_HANDLER(nrf_error);
 }
 
-
-/**@brief Function for initializing the Connection Parameters module.
- */
 static void conn_params_init(void)
 {
     uint32_t               err_code;
@@ -287,20 +257,8 @@ static void conn_params_init(void)
     APP_ERROR_CHECK(err_code);
 }
 
-
-/**@brief Function for putting the chip into sleep mode.
- *
- * @note This function will not return.
- */
 static void sleep_mode_enter(void)
 {
-    uint32_t err_code = bsp_indication_set(BSP_INDICATE_IDLE);
-    APP_ERROR_CHECK(err_code);
-
-    // Prepare wakeup buttons.
-    err_code = bsp_btn_ble_sleep_mode_prepare();
-    APP_ERROR_CHECK(err_code);
-
     // Go to system-off mode (this function will not return; wakeup will cause a reset).
     err_code = sd_power_system_off();
     APP_ERROR_CHECK(err_code);
@@ -308,13 +266,10 @@ static void sleep_mode_enter(void)
 
 static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 {
-    uint32_t err_code;
 
     switch (ble_adv_evt)
     {
         case BLE_ADV_EVT_FAST:
-            err_code = bsp_indication_set(BSP_INDICATE_ADVERTISING);
-            APP_ERROR_CHECK(err_code);
             break;
         case BLE_ADV_EVT_IDLE:
             sleep_mode_enter();
@@ -325,11 +280,6 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
 }
 
 
-/**@brief Function for handling BLE events.
- *
- * @param[in]   p_ble_evt   Bluetooth stack event.
- * @param[in]   p_context   Unused.
- */
 static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 {
     uint32_t err_code;
@@ -338,8 +288,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
             NRF_LOG_INFO("Connected");
-            err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
-            APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
             err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
             APP_ERROR_CHECK(err_code);
@@ -408,10 +356,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 }
 
 
-/**@brief Function for the SoftDevice initialization.
- *
- * @details This function initializes the SoftDevice and the BLE event interrupt.
- */
+
 static void ble_stack_init(void)
 {
     ret_code_t err_code;
@@ -447,7 +392,7 @@ static void ble_stack_init(void)
 }
 
 
-/**@brief Function for handling events from the GATT library. */
+
 void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
 {
     if ((m_conn_handle == p_evt->conn_handle) && (p_evt->evt_id == NRF_BLE_GATT_EVT_ATT_MTU_UPDATED))
@@ -461,7 +406,7 @@ void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
 }
 
 
-/**@brief Function for initializing the GATT library. */
+
 void gatt_init(void)
 {
     ret_code_t err_code;
@@ -474,51 +419,7 @@ void gatt_init(void)
 }
 
 
-/**@brief Function for handling events from the BSP module.
- *
- * @param[in]   event   Event generated by button press.
- */
-void bsp_event_handler(bsp_event_t event)
-{
-    uint32_t err_code;
-    switch (event)
-    {
-        case BSP_EVENT_SLEEP:
-            sleep_mode_enter();
-            break;
 
-        case BSP_EVENT_DISCONNECT:
-            err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-            if (err_code != NRF_ERROR_INVALID_STATE)
-            {
-                APP_ERROR_CHECK(err_code);
-            }
-            break;
-
-        case BSP_EVENT_WHITELIST_OFF:
-            if (m_conn_handle == BLE_CONN_HANDLE_INVALID)
-            {
-                err_code = ble_advertising_restart_without_whitelist(&m_advertising);
-                if (err_code != NRF_ERROR_INVALID_STATE)
-                {
-                    APP_ERROR_CHECK(err_code);
-                }
-            }
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-/**@brief   Function for handling app_uart events.
- *
- * @details This function will receive a single character from the app_uart module and append it to
- *          a string. The string will be be sent over BLE when the last character received was a
- *          'new line' '\n' (hex 0x0A) or if the string has reached the maximum data length.
- */
-/**@snippet [Handling the data received over UART] */
 void uart_event_handle(app_uart_evt_t * p_event)
 {
     static uint8_t data_array[BLE_NUS_MAX_DATA_LEN];
@@ -623,8 +524,6 @@ static void idle_state_handle(void)
     }
 }
 
-
-
 static void advertising_start(void)
 {
     uint32_t err_code = ble_advertising_start(&m_advertising, BLE_ADV_MODE_FAST);
@@ -692,290 +591,191 @@ void ble_data_send_with_queue(void)
         
 }
 
-static void throughput_timer_handler(void * p_context)
+uint32_t RHS2116_RW_WORD(uint32_t dat_32)
 {
-	NRF_LOG_INFO("==**Speed: %d B/s,drop:%d**==", m_len_sent,m_drop_cnts);
-	m_drop_cnts = 0;
-	m_len_sent = 0;
+		  
+	uint8_t ret1,ret2,ret3,ret4;
+	uint32_t ret_32=0;
+	
+	ret1=(uint8_t)((dat_32>>24)&0xff);
+	ret2=(uint8_t)((dat_32>>16)&0xff);
+	ret3=(uint8_t)((dat_32>>8)&0xff);
+	ret4=(uint8_t)((dat_32)&0xff);
+	m_tx_buf[0]=ret1;
+	m_tx_buf[1]=ret2;
+	m_tx_buf[2]=ret3;
+	m_tx_buf[3]=ret4;
+	spi_xfer_done = false;	
+	APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, m_length, m_rx_buf, m_length));
+	while (!spi_xfer_done);					
+	ret_32=(m_rx_buf[0]<<24)+(m_rx_buf[1]<<16)+(m_rx_buf[2]<<8)+(m_rx_buf[3]);	
+	return ret_32;
 }
 
-static void callCommand(void){
-
-    spi_xfer_done = false;
-
-     APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, m_tx_buf, m_length, m_rx_buf, m_length));
-	  //nrf_drv_spi_transfer(&spi, m_tx_buf, m_length, m_rx_buf, m_length);
-    while (!spi_xfer_done)
-    {
-        __WFE(); // wait for event 等待事件，即下一次事件发生前都在此hold住不干活，
-		// 执行这条语句后CPU功耗会降低，通常用这条语句来省电。
-    }
-}
-
-void Convert(uint8_t channel) //D flag = 1 in each
+uint32_t CMD_CONVERT_REG(uint8_t channel)
 {
-	m_tx_buf[0] = 0x08;
-	m_tx_buf[1] = 0x00 + channel;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	uint32_t cmd_32=0x08000000;
+	uint32_t ret_32;
+	cmd_32|=((0x00ff0000)&(channel<<16));
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(cmd_32);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	ret_32=RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	return ret_32;
 }
 
-void TransReg(uint8_t tx) {
-    SPI_CS_LOW;
-    m_tx_buf[0] = 0x80;
-    m_tx_buf[1] = tx;
-    m_tx_buf[2] = 0xFF;
-    m_tx_buf[3] = 0xFF;
-    callCommand();
-    SPI_CS_HIGH;
+    // Write data D to register R
+uint8_t CMD_WRITE_REG(uint8_t U,uint8_t M,uint8_t R,uint16_t D)
+{
+	uint32_t cmd_32=0x80000000;
+	uint32_t ret_32;
+	if(U!=0) cmd_32|=0x20000000;
+	if(M!=0) cmd_32|=0x10000000;
+	
+	cmd_32|=((0x00ff0000)&(R<<16));
+	cmd_32|=((0x0000ffff)&(D));
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(cmd_32);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	ret_32=RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	if((ret_32&0xffff0000)!=0xffff0000) 
+	{return 255;}
+	
+	if((ret_32&0x0000ffff)!=D) 
+	{return 255;}
+	
+	return 0;
 }
 
-void TransRegAndConv(uint8_t value, uint8_t tx_1, uint8_t tx_2, uint32_t* dat){
-	Convert(value);
-	TransReg(tx_1);
-	TransReg(tx_2);
-	dat[value] |= m_rx_buf[0] << 24;
-	dat[value] |= m_rx_buf[1] << 16;
-	dat[value] |= m_rx_buf[2] << 8;
-	dat[value] |= m_rx_buf[3];
+void CMD_READ_REG(uint8_t U,uint8_t M,uint8_t R,uint16_t* D)
+{
+	uint32_t cmd_32=0xc0000000;
+	uint32_t ret_32;
+	if(U!=0) cmd_32|=0x20000000;
+	if(M!=0) cmd_32|=0x10000000;
+	
+	cmd_32|=((0x00ff0000)&(R<<16));
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(cmd_32);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	SPI_CS_LOW;
+	ret_32=RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+	
+	*D=(uint16_t)(ret_32&0x0000ffff);
 }
 
-void transfer (void) {
+void CMD_CLEAR_ADC(void)
+{
+	uint32_t cmd_32=0x6a000000;
 	
-	//Read Register 255
-	m_tx_buf[0] = 0xC0;
-	m_tx_buf[1] = 0xFF;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(cmd_32);
+	SPI_CS_HIGH;
 	
-    //Write Register 32 -> 0000
- 
-	m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x20;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
 	
-	//Write Register 33 -> 0000
+	SPI_CS_LOW;
+	RHS2116_RW_WORD(0xffffffff);
+	SPI_CS_HIGH;
+}
 
-	m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x21;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
-		
-	//Write Register 38 -> FFFF
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x26;
-	m_tx_buf[2] = 0xFF;
-	m_tx_buf[3] = 0xFF;
-	callCommand();
-		
-		//Clear
- 
-    m_tx_buf[0] = 0x6A;
-	m_tx_buf[1] = 0x00;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
-		
-		//Write Register 0 -> 00C7
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x00;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0xc7;
-	callCommand();
-		
-		//Write Register 1 -> 051A
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x01;
-	m_tx_buf[2] = 0x05;
-	m_tx_buf[3] = 0x1A;
-	callCommand();
-		
-		//Write Register 2 -> 0040
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x02;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x40;
-	callCommand();
-		
-		//Write Register 3 -> 0080
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x03;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x80;
-	callCommand();
-
-		//Write Register 4 -> 0016
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x04;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x16;
-	callCommand();
-		
-		//Write Register 5 -> 0017
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x05;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x17;
-	callCommand();
+uint8_t rhs2116_init(void)
+{
+	uint16_t val;
 	
-		//Write Register 6 -> 00A8
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x06;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0xA8;
-	callCommand();
-		
-		//Write Register 7 -> 000A
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x07;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x0A;
-	callCommand();
-		
-		//Write Register 8 -> FFFF
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x08;
-	m_tx_buf[2] = 0xFF;
-	m_tx_buf[3] = 0xFF;
-	callCommand();
-		
-		//Write Register 10 -> 0000 UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x0A;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
-		
-		//Write Register 12 -> FFFF UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x0C;
-	m_tx_buf[2] = 0xFF;
-	m_tx_buf[3] = 0xFF;
-	callCommand();
-		
-		//Write Register 34 -> 00E2
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x22;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0xE2;
-	callCommand();
-		
-		//Write Register 35 -> 00AA
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x23;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0xAA;
-	callCommand();
+	CMD_READ_REG(0,0,255,&val);
 	
-		//Write Register 36 -> 0080
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x24;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x80;
-	callCommand();
+	CMD_WRITE_REG(0,0,32,0x0000);
+	CMD_WRITE_REG(0,0,33,0x0000);
+	CMD_WRITE_REG(0,0,38,0xffff);
+	CMD_CLEAR_ADC();
 	
-		//Write Register 37 -> 4F00
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x25;
-	m_tx_buf[2] = 0x4F;
-	m_tx_buf[3] = 0x00;
-	callCommand();
-		
-		//Write Register 42 -> 0000 UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x2A;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	CMD_WRITE_REG(0,0,0,0x00c7);
+	CMD_WRITE_REG(0,0,1,0x051a);
+	CMD_WRITE_REG(0,0,2,0x0040);
+	CMD_WRITE_REG(0,0,3,0x0080);
+	CMD_WRITE_REG(0,0,4,0x0016);
+	CMD_WRITE_REG(0,0,5,0x0017);
+	CMD_WRITE_REG(0,0,6,0x00a8);
+	CMD_WRITE_REG(0,0,7,0x000a);
+	CMD_WRITE_REG(0,0,8,0xffff);
+	CMD_WRITE_REG(1,0,10,0x0000);
+	CMD_WRITE_REG(1,0,12,0xffff);
+	CMD_WRITE_REG(0,0,34,0x00e2);
+	CMD_WRITE_REG(0,0,35,0x00aa);
+	CMD_WRITE_REG(0,0,36,0x0080);
+	CMD_WRITE_REG(0,0,37,0x4f00);
+	CMD_WRITE_REG(1,0,42,0x0000);
+	CMD_WRITE_REG(1,0,44,0x0000);
+	CMD_WRITE_REG(1,0,46,0x0000);
+	CMD_WRITE_REG(1,0,48,0x0000);
 	
-		//Write Register 44 -> 0000 UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x2C;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	CMD_WRITE_REG(1,0,64,0x8000);
+	CMD_WRITE_REG(1,0,65,0x8000);
+	CMD_WRITE_REG(1,0,66,0x8000);
+	CMD_WRITE_REG(1,0,67,0x8000);
+	CMD_WRITE_REG(1,0,68,0x8000);
+	CMD_WRITE_REG(1,0,69,0x8000);
+	CMD_WRITE_REG(1,0,70,0x8000);
+	CMD_WRITE_REG(1,0,71,0x8000);
+	CMD_WRITE_REG(1,0,72,0x8000);
+	CMD_WRITE_REG(1,0,73,0x8000);
+	CMD_WRITE_REG(1,0,74,0x8000);
+	CMD_WRITE_REG(1,0,75,0x8000);
+	CMD_WRITE_REG(1,0,76,0x8000);
+	CMD_WRITE_REG(1,0,77,0x8000);
+	CMD_WRITE_REG(1,0,78,0x8000);
+	CMD_WRITE_REG(1,0,79,0x8000);
+	CMD_WRITE_REG(1,0,96,0x8000);
+	CMD_WRITE_REG(1,0,97,0x8000);
+	CMD_WRITE_REG(1,0,98,0x8000);
+	CMD_WRITE_REG(1,0,99,0x8000);
+	CMD_WRITE_REG(1,0,100,0x8000);
+	CMD_WRITE_REG(1,0,101,0x8000);
+	CMD_WRITE_REG(1,0,102,0x8000);
+	CMD_WRITE_REG(1,0,103,0x8000);
+	CMD_WRITE_REG(1,0,104,0x8000);
+	CMD_WRITE_REG(1,0,105,0x8000);
+	CMD_WRITE_REG(1,0,106,0x8000);
+	CMD_WRITE_REG(1,0,107,0x8000);
+	CMD_WRITE_REG(1,0,108,0x8000);
+	CMD_WRITE_REG(1,0,109,0x8000);
+	CMD_WRITE_REG(1,0,110,0x8000);
+	CMD_WRITE_REG(1,0,111,0x8000);
 	
-		//Write Register 46 -> 0000 UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x2E;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
-		
-		//Write Register 48 -> 0000 UFlag = 1
- 
-    m_tx_buf[0] = 0xA0;
-	m_tx_buf[1] = 0x30;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	CMD_WRITE_REG(0,0,32,0xaaaa);
+	CMD_WRITE_REG(0,0,33,0x00ff);
 	
-	//Write Register 64 ~ 79 -> 0000 UFlag = 1
-	for(uint8_t i = 0x40; i<=0x4F; i++)
-	{
-		m_tx_buf[0] = 0xA0;
-		m_tx_buf[1] = i;
-		m_tx_buf[2] = 0x80;
-		m_tx_buf[3] = 0x00;
-		callCommand();
-	}			
+	CMD_READ_REG(0,1,255,&val);
 	
-		//Write Register 96 ~ 111 -> 0000 UFlag = 1
-	for(uint8_t i = 0x60; i<=0x6F; i++)
-	{
-		m_tx_buf[0] = 0xA0;
-		m_tx_buf[1] = i;
-		m_tx_buf[2] = 0x80;
-		m_tx_buf[3] = 0x00;
-		callCommand();
-	}
-
-		//Write Register 32 -> AAAA
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x20;
-	m_tx_buf[2] = 0xAA;
-	m_tx_buf[3] = 0xAA;
-	callCommand();
-	
-		//Write Register 33 -> 00FF
- 
-    m_tx_buf[0] = 0x80;
-	m_tx_buf[1] = 0x21;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0xFF;
-	callCommand();
-		
-		//Read Register 255 MFlag = 1
-	m_tx_buf[0] = 0xD0;
-	m_tx_buf[1] = 0xFF;
-	m_tx_buf[2] = 0x00;
-	m_tx_buf[3] = 0x00;
-	callCommand();
+	return 0;
 }
 
 uint16_t crc16(const uint8_t* data, size_t length) {
@@ -995,90 +795,102 @@ uint16_t crc16(const uint8_t* data, size_t length) {
 }
 
 
-
-void packageData(const uint32_t* data, uint8_t* packet) {
-    //Data packet format: [Header (2 bytes)][Length (2 bytes)][Data (64 bytes)][CRC16 (2 bytes)]
+void packageData(const uint32_t* data, size_t dataLength, uint8_t* packet) {
+    // Data packet format: [Header (2 bytes)][Length (2 bytes)][Data (Variable length)][CRC16 (2 bytes)]
 
     uint8_t* dataBytes = (uint8_t*)data;
     
-    packet[0] = 0xAA;
-    packet[1] = 0xBB;
+    packet[0] = 0xAA; // Header byte 1
+    packet[1] = 0xBB; // Header byte 2
     
-    packet[2] = 0x00; 
-    packet[3] = 0x40; 
+    // Assuming dataLength is the number of bytes in the data array.
+    packet[2] = (uint8_t)((dataLength >> 8) & 0xFF); // Length high byte
+    packet[3] = (uint8_t)(dataLength & 0xFF);       // Length low byte
 
-    for (size_t i = 0; i < 64; i++) {
+    for (size_t i = 0; i < dataLength && i < 64; i++) { // Copy up to 64 bytes of data
         packet[4 + i] = dataBytes[i];
     }
 
-    uint16_t crc = crc16(packet + 2, 66); 
-    packet[68] = (uint8_t)(crc >> 8);    
-    packet[69] = (uint8_t)(crc & 0xFF);
+    // Assuming packet length for CRC is length of header, length, and data
+    uint16_t crc = crc16(packet + 2, 2 + dataLength); 
+    packet[4 + dataLength] = (uint8_t)(crc >> 8);    // CRC high byte
+    packet[5 + dataLength] = (uint8_t)(crc & 0xFF);  // CRC low byte
 }
 
-void spi_event_handler(nrf_drv_spi_evt_t const * p_event,void * p_context)
-{   
-    spi_xfer_done = true;   
-}
 
-void SPI_Init(void)
+void Gather_start_repeat_3_times()
 {
-	  nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
-    spi_config.ss_pin   = SPI_SS_PIN;
-    spi_config.miso_pin = SPI_MISO_PIN;
-    spi_config.mosi_pin = SPI_MOSI_PIN;
-    spi_config.sck_pin  = SPI_SCK_PIN;
-    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
-}
+    memset(send_pack,0,sizeof(send_pack));
 
-void hexArrayToString(unsigned char* hexArray, int length, char* str) {
-    for (int i = 0; i < length; i++) {
-        sprintf(&str[i * 2], "%02X", hexArray[i]);
-    }
-}
-void Gather_start()
-{
-	  memset(send_pack,0,sizeof(send_pack)); //将send_pack中的数据清零
-
-	  for(int i=0;i<3;i++)
-	  {  
-					uint32_t dat_[16] = {0};	   
-					
-					memset(packet_,0,sizeof(packet_));						
-					TransRegAndConv(0,0x27,0x29,dat_);
-					TransRegAndConv(1,0x2B,0x2D,dat_);
-					TransRegAndConv(2,0x2F,0x31,dat_);
-					TransRegAndConv(3,0x33,0x34,dat_);
-					TransRegAndConv(4,0x35,0x36,dat_);
-					TransRegAndConv(5,0x37,0x38,dat_);
-					TransRegAndConv(6,0x39,0x3A,dat_);
-					TransRegAndConv(7,0x3B,0x3C,dat_);
-					TransRegAndConv(8,0x3D,0x3E,dat_);
-					TransRegAndConv(9,0x50,0x51,dat_);
-					TransRegAndConv(10,0x52,0x53,dat_);
-					TransRegAndConv(11,0x54,0x55,dat_);
-					TransRegAndConv(12,0x56,0x57,dat_);
-					TransRegAndConv(13,0x58,0x59,dat_);
-					TransRegAndConv(14,0x5A,0x5B,dat_);
-					TransRegAndConv(15,0x5C,0x5D,dat_);
-					packageData(dat_, packet_);
-			     
-			    memcpy(&send_pack[(i%10)*70],packet_,70); //使用memcpy函数将packet的70字节数据复制到send_pack，复制3次，共210字节
+    for(int i=0;i<3;i++)
+    {  
+        uint32_t dat_[16] = {0};
+				
+				size_t data_length = sizeof(dat_);
+                
+        memset(packet_,0,sizeof(packet_));
+        
+        for(int j=0;j<16;j++)
+        {
+            dat_[j]=CMD_CONVERT_REG(j);
+        }
+        packageData(dat_, data_length, packet_);
+            
+        memcpy(&send_pack[(i%10)*(data_length+6)],packet_,(data_length+6));
 				
 	    }	
 		
-		  if(packet_[0]==0xAA && packet_[1]==0xBB)
+    if(packet_[0]==0xAA && packet_[1]==0xBB)
+    {
+        memcpy(buf_.buf,send_pack,210);
+        buf_.length = 210;
+        err_code = nrf_queue_push(&m_buf_queue, &buf_);
+    
+        if(err_code == NRF_ERROR_NO_MEM && connect_flag)
+        {
+            m_drop_cnts++;
+        }
+                
+    }					
+}
+
+void Gather_start_no_repeat()
+{
+    memset(send_pack,0,sizeof(send_pack));
+
+			uint32_t dat_[16] = {0};
+			
+			size_t data_length = sizeof(dat_);
+							
+			memset(packet_,0,sizeof(packet_));
+			
+			for(int j=0;j<16;j++)
 			{
-                memcpy(buf_.buf,send_pack,210);
-				buf_.length = 210;
-				err_code = nrf_queue_push(&m_buf_queue, &buf_);
-				
-				if(err_code == NRF_ERROR_NO_MEM && connect_flag)
-				{
-                    m_drop_cnts++;
-				}
-						
-			}					
+					dat_[j]=CMD_CONVERT_REG(j);
+			}
+			packageData(dat_, data_length, packet_);
+            
+
+		
+    if(packet_[0]==0xAA && packet_[1]==0xBB)
+    {
+        memcpy(buf_.buf,packet_,data_length+6);
+        buf_.length = data_length+6;
+        err_code = nrf_queue_push(&m_buf_queue, &buf_);
+    
+        if(err_code == NRF_ERROR_NO_MEM && connect_flag)
+        {
+            m_drop_cnts++;
+        }
+                
+    }					
+}
+
+static void throughput_timer_handler(void * p_context)
+{
+	NRF_LOG_INFO("==**Speed: %d B/s,drop:%d**==", m_len_sent,m_drop_cnts);
+	m_drop_cnts = 0;
+	m_len_sent = 0;
 }
 
 void throughput_test()
@@ -1087,11 +899,28 @@ void throughput_test()
 	err_code = app_timer_create(&m_timer_speed, APP_TIMER_MODE_REPEATED, throughput_timer_handler);
 	APP_ERROR_CHECK(err_code);	
 }
+
+void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
+                       void *                    p_context)
+{
+	spi_xfer_done = true;
+}
+
+void spi_init(void)
+{
+	nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
+    spi_config.ss_pin   = SPI_SS_PIN;
+    spi_config.miso_pin = SPI_MISO_PIN;
+    spi_config.mosi_pin = SPI_MOSI_PIN;
+    spi_config.sck_pin  = SPI_SCK_PIN;
+    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
+}
+
 int main(void)
 {
-	SPI_Init();
+    spi_init();
+    rhs2116_init();
     log_init();
-	transfer();
     timers_init();
     power_management_init();
     ble_stack_init();
@@ -1102,11 +931,11 @@ int main(void)
     conn_params_init();
     NRF_LOG_INFO("Debug logging for UART over RTT started.");
     advertising_start();
-	throughput_test();
+    throughput_test();
 
     for (;;)
     {
-        Gather_start();//SPI采集
+        Gather_start_no_repeat();
         ble_data_send_with_queue();
         idle_state_handle();
     }

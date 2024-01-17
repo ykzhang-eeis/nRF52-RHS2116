@@ -16,9 +16,8 @@
 #include "RHS2116.h"
 #include "nrf_delay.h"
 
-//SPI驱动程序实例ID,ID和外设编号对应，0:SPI0  1:SPI1 2:SPI2
+
 #define SPI_INSTANCE  0 
-//定义名称为spi的SPI驱动程序实例
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  
 //SPI传输完成标志
 static volatile bool spi_xfer_done;  
@@ -28,57 +27,11 @@ static uint8_t    spi_tx_buf[4];
 static uint8_t    spi_rx_buf[4];  
 static const uint8_t m_length = sizeof(spi_tx_buf);        /**< Transfer length. */
 
-/*****************************************************************************
-** 描  述：写入一个字节
-** 参  数：Dat：待写入的数据
-** 返回值：无
-******************************************************************************/
-uint8_t Spi_WriteOneByte(uint8_t Dat)
-{   
-	  spi_tx_buf[0] = Dat;
-	  spi_xfer_done = false;
-	  //SPI_CS_LOW;
-	  APP_ERROR_CHECK(nrf_drv_spi_transfer(&spi, spi_tx_buf, sizeof(spi_tx_buf), spi_rx_buf, sizeof(spi_tx_buf)));
-    while(!spi_xfer_done);
-	  //SPI_CS_HIGH;
-	  return spi_rx_buf[0];
-	
-}
-
-//SPI事件处理函数
-void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
-                       void *                    p_context)
-{
-  //设置SPI传输完成  
-	spi_xfer_done = true;
-}
-
-/*****************************************************************************
-** 描  述：配置用于驱动W25Q128的管脚
-** 入  参：无
-** 返回值：无
-******************************************************************************/
-void SPI_Flash_Init(void)
-{
-	nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
-    spi_config.ss_pin   = SPI_SS_PIN;
-    spi_config.miso_pin = SPI_MISO_PIN;
-    spi_config.mosi_pin = SPI_MOSI_PIN;
-    spi_config.sck_pin  = SPI_SCK_PIN;
-    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
-}
-
-
 uint32_t RHS2116_RW_WORD(uint32_t dat_32)
 {
 		  
 	uint8_t ret1,ret2,ret3,ret4;
 	uint32_t ret_32=0;
-//	ret1=Spi_WriteOneByte((uint8_t)((dat_32>>24)&0xff));
-//	ret2=Spi_WriteOneByte((uint8_t)((dat_32>>16)&0xff));
-//	ret3=Spi_WriteOneByte((uint8_t)((dat_32>>8)&0xff));
-//	ret4=Spi_WriteOneByte((uint8_t)((dat_32)&0xff));
-//	ret_32=(ret1<<24)+(ret2<<16)+(ret3<<8)+(ret4);
 	
 	ret1=(uint8_t)((dat_32>>24)&0xff);
 	ret2=(uint8_t)((dat_32>>16)&0xff);
@@ -258,12 +211,6 @@ uint8_t RHS2116_CONFIG(void)
 	CMD_WRITE_REG(1,0,46,0x0000);
 	CMD_WRITE_REG(1,0,48,0x0000);
 	
-	
-
-	
-	//设置刺激电流步长 step size=10uA full scale=2.55mA
-	CMD_WRITE_REG(0,0,34,0x000f);
-	
 	//设置刺激电流负电流幅度
 	CMD_WRITE_REG(1,0,64,0xff80);
 	CMD_WRITE_REG(1,0,65,0xff80);
@@ -315,19 +262,11 @@ uint8_t SPI_ReadID(void)
 	uint8_t dat1 = 0;
 	uint8_t dat2 = 0;
 	uint8_t dat3 = 0;
-	uint8_t dat4 = 0;
-	uint8_t dat5 = 0;
-	uint8_t dat6 = 0;
-	uint8_t dat7 = 0;
 	//准备数据
 	spi_tx_buf[0] = 0xC0;
 	spi_tx_buf[1] = 0xFB;
 	spi_tx_buf[2] = 0x00;
 	spi_tx_buf[3] = 0x00;
-//	spi_tx_buf[4] = 0xFF;
-//	spi_tx_buf[5] = 0xFF;
-//	spi_tx_buf[6] = 0xFF;
-//	spi_tx_buf[7] = 0xFF;
 	//拉低CS，使能
 	SPI_CS_LOW;
 	//启动数据传输
@@ -336,16 +275,12 @@ uint8_t SPI_ReadID(void)
         {
             __WFE();
         }
-  //拉高CS，释放W25Q128FV
+  //拉高CS
 	SPI_CS_HIGH;
 	dat0 |= spi_rx_buf[0];
 	dat1 |= spi_rx_buf[1];
 	dat2 |= spi_rx_buf[2];	
 	dat3 |= spi_rx_buf[3];
-//	dat4 |= spi_rx_buf[4];
-//	dat5 |= spi_rx_buf[5];
-//	dat6 |= spi_rx_buf[6];
-//	dat7 |= spi_rx_buf[7];
   return dat3;		
 }
 
@@ -381,4 +316,4 @@ uint8_t CMD_START_CONV(uint8_t U,uint8_t M,uint8_t D,uint8_t H,uint8_t C,uint16_
 }
 
 /********************************************END FILE*******************************************/
-                                                                                 
+
