@@ -3370,7 +3370,7 @@
  
 
 #ifndef NRFX_SPIM1_ENABLED
-#define NRFX_SPIM1_ENABLED 1
+#define NRFX_SPIM1_ENABLED 0
 #endif
 
 // <q> NRFX_SPIM2_ENABLED  - Enable SPIM2 instance
@@ -3610,7 +3610,7 @@
  
 
 #ifndef NRFX_SPI1_ENABLED
-#define NRFX_SPI1_ENABLED 1
+#define NRFX_SPI1_ENABLED 0
 #endif
 
 // <q> NRFX_SPI2_ENABLED  - Enable SPI2 instance
@@ -5475,7 +5475,7 @@
 // <e> SPI1_ENABLED - Enable SPI1 instance
 //==========================================================
 #ifndef SPI1_ENABLED
-#define SPI1_ENABLED 1
+#define SPI1_ENABLED 0
 #endif
 // <q> SPI1_USE_EASY_DMA  - Use EasyDMA
  
