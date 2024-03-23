@@ -231,6 +231,10 @@ void rhs2116_sampling() {
         offset += n;
         if (offset >= sizeof(logStr)) break;
     }
+		rhs2116_CHRG_RECOVER(0x0000, true);				
+		rhs2116_CUR_LMT_CHRG_REC(0x0000, true);		
+		rhs2116_STIM_POL(0x0000, true);
+		rhs2116_STIM_ON(0x0000, true);	
 
     NRF_LOG_INFO("%s", NRF_LOG_PUSH(logStr));
     NRF_LOG_FLUSH();
